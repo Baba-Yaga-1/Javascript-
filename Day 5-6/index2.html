@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question 2</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        .content {
+            font-family:'Arial Narrow', Arial, sans-serif;
+            height: 500px;
+            width: 80%;
+            background-color: lightgray;
+            margin-left: 10%;
+            margin-top: 50px;
+            padding: 20px;
+            display: inline-block;
+        }
+        h1 {
+            text-align: center;
+            font-family: fantasy;
+        }
+        .table {
+            width: 100%;
+            margin-top: 20px;
+            text-align: center;
+            border: blueviolet;
+         }
+         td {
+             text-align: center;
+             height: 40px;
+             padding: 5px;
+             font-family: monospace, Arial, Helvetica, sans-serif;
+         }
+         th {
+             text-align: center;
+             height: 40px;
+             padding: 5px;
+             font-family: Georgia, 'Times New Roman', Times, serif;
+             background-color: darkgray;
+         }
+         .form {
+             margin-top: 20px;
+         }
+         .form1 {
+             margin-top: 20px;
+             text-align: center;
+         }
+         input{
+            width:200px;
+            height:40px;
+            border-radius: 10px;
+            margin-left: 10px;
+            margin-top: 10px;
+            text-align: center;
+        } 
+         input {
+             height: 40px;
+             text-indent: 20px;
+         }
+         button {
+             padding: 10px;
+             
+         }
+    </style>
+</head>
+<body>
+
+    <div class="content">
+        <h1><u>BUS MANAGEMENT SYSTEM</u></h1>
+
+        <div class="form">
+            <form onsubmit="addBus(event)">
+              <input type="text" required placeholder="Name" id="name" />
+              <input type="text" required placeholder="Source" id="source" />
+              <input type="text" required placeholder="Destination" id="destination" />
+              <input type="number" required placeholder="Number" id="number" />
+              <input type="number" required placeholder="Passenger Capacity" id="capacity" />
+              <button type="submit">Add Bus</button>
+            </form>
+          </div>
+  
+          <div class="form1">
+              <input type="text" placeholder="Search by Source" id="searchName" onkeyup="search()" />
+              
+              <input type="text" placeholder="Search by Destination" id="searchName1" onkeyup="search1()" />
+          </div>
+
+          <table border="4" class="table" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Source</th>
+                    <th>Destination</th>
+                    <th>Number</th>
+                    <th>Passenger Capacity</th>
+                   
+                </tr>
+            </thead>
+            <tbody id="tdata">
+               
+            </tbody>
+        </table>
+
+    </div>
+    
+    <script src="2.js"></script>
+</body>
+</html>
