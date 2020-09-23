@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        .header {
+            height: 150px;
+            width: 100%;
+            background-color: pink;
+            line-height: 80px;
+        }
+        h1 {
+            margin-left: 50px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            display: inline-block;
+            width: 30%;
+            vertical-align: top;
+            color: purple;
+        }
+        .search {
+            height: 70px;
+            width: 60%;
+            /* background-color: darkgray; */
+            display: inline-block;
+        }
+        .search input {
+            height: 40px;
+            width: 100%;
+            text-indent: 20px;
+            border-radius: 8px;
+            border: 1px solid cornflowerblue;
+            outline: none;
+        }
+        .filter {
+            height: 1%;
+            width: 50%;
+            /* background-color: brown; */
+            display: inline-block;
+            margin-left: 40%;
+        }
+        .filter input{
+             margin: 5px;
+             height: 30px;
+             width: 500;
+             text-indent: 20px;
+             border: 1px solid gray;
+             border-radius: 10px;
+             outline: none;
+         }
+         .filter button{
+             padding: 5px;
+             margin: 20px;
+             background-color: darkred;
+             border-radius: 10px;
+             outline: none;
+         }
+        h5 {
+            color: purple;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: inline-block;
+        }
+        .products {
+            width: 100%;
+            height: auto;
+            background-image: url("background.jpg");
+            
+        }
+        .productwrapper {
+            height: auto;
+            width: 80%;
+            /* background-color: darkorchid; */
+            margin-left: 10%;
+            margin-bottom: 50px;
+        }
+        .product {
+            height: auto;
+            width: 25%;
+            /* background-color: darkolivegreen; */
+            display: inline-block;
+            margin-top: 25px;
+            margin-left: 6.25%;
+            border: 1px solid lightgray;            
+        }
+        .prodimg {
+            height: 300px;
+            width: 100%;
+            /* background-color: darkseagreen; */
+            overflow: hidden;
+        }
+        .product h3, p {
+            padding: 5px;
+            padding-left: 10px;
+        }
+        .cart {
+            margin-left: 0%;
+           color: purple;
+            display: inline-block;
+            width: 5%;
+            padding: 8px;
+        }
+        h3 {
+            color: red;
+        }
+        h2 {
+            color:purple;
+            padding: 10px;
+        }
+        .product p {
+            color: purple;
+        }
+        button {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><u>THE FULL CART</u></h1>
+        <div class="search">
+            <input 
+            type="search" 
+            onkeyup="searchProduct(this.value)" 
+            placeholder="Search for Products" />          
+        </div>
+        <div class="filter">
+            <h5>Filter By Price:</h2>
+                <input type="text" id="minp" placeholder="Minimum Price" />
+            <input type="text" id="maxp" placeholder="Maximum Price" />
+            <button onclick="filter()">Filter</button>
+        </div>
+        <div class="cart" >
+            <h>Cart : </h>
+            <h class="productwrapper" id="numb">0</h>
+        </div>
+
+    </div>
+
+    <div class="products">
+        <div class="productwrapper" id="productwrapper">
+        
+        </div>
+    </div>
+
+    <div class="products">
+        <h2>CART</h2>
+        <div class="productwrapper" id="cart"></div>
+      </div>
+    <script src="shopping.js"></script>
+</body>
+</html>
