@@ -389,44 +389,51 @@ Lex Part
 
 Yacc Part
 
-%token IF RELOP S NUMBER ID
 %{
+#include<stdio.h>
+#include<stdlib.h>
 int count=0;
 %}
+
+%token IF RELOP S NUMBER ID
+
 %%
-stmt : if_stmt { printf(“No of nested if statements=%d\n”,count); exit(0);}
+stmt: if_stmt {printf("No. of nested if statements=%d\n",count);exit(0);}
 ;
-if_stmt : IF ‘(‘ cond ‘)’ if_stmt {count++;}
-| S;
+if_stmt : IF'('cond')''{'if_stmt'}' {count++;}
+          |S
 ;
-cond : x RELOP x
+cond: x RELOP x 
 ;
-x : ID
-| NUMBER
+x:ID | NUMBER
 ;
 %%
-int yyerror(char *msg)
+
+int yyerror()
 {
-printf(“Invalid Expression\n”); exit(0);
+//printf("the statement is invalid\n");
+exit(0);
 }
-main ()
+
+int main()
 {
-printf(“Enter the statement”); yyparse();
+printf("enter the statement: \n");
+yyparse();
+return 0;
 }
  
-
-
 Lex Part
-
 %{
-#include “y.tab.h”
+#include "y.tab.h"
 %}
 %%
-“if” { return IF; } [sS][0-9]* {return S;}
-“<”|”>”|”==”|”!=”|”<=”|”>=” { return RELOP; } [0-9]+ { return NUMBER; }
-[a-zA-Z][a-zA-Z0-9_]* { return ID; }
-\n { ; }
-. { return yytext[0]; }
+"if" {return IF;}
+[sS][0-9]* {return S;}
+"<"|">"|"=="|"<="|">="|"!=" {return RELOP;}
+[0-9]+ {return NUMBER;}
+[a-z][a-zA-Z0-9_]* {return ID;}
+\n {return 0;}
+. {return yytext[0];}
 %%
  
 
