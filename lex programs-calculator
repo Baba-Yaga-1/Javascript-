@@ -54,16 +54,14 @@ exp : NUMBER {$$ == $1;}
 
 %%
 
-int main()
+int yyerror(char *msg)
 {
-yyparse();
+	printf("Invalid\n");
+	exit(0);
 }
 
-int yyerror()
+main()
 {
-}
-
-int yywrap()
-{
-return 1;
+	
+	yyparse();
 }
