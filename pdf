@@ -281,48 +281,35 @@ int main()
 8.	Program to recognize and count the number of identifiers in a given input file.
 
 %{
-#include<stdio.h> int id=0;
-%}
-%%
-[a-zA-Z][a-zA-Z0-9_]* { id++ ; ECHO; printf(“\n”);}
-.+ { ;}
-\n { ;}
-%%
-int yywrap()
-{
-return 1;
-}
-
-main (int argc, char *argv[])
-{
-if(argc!=2)
-{
-printf(“Usage: <./a.out> <sourcefile>\n”); exit(0);
-}
-yyin=fopen(argv[1],”r”); printf(“Valid identifires are\n”); yylex();
-printf(“No of identifiers = %d\n”,id);
-}
- 
-//Program to identify the identifier.
-
-%{
 #include<stdio.h>
+#include<string.h>
+int count_key=0;
 %}
+
 %%
-^[a-zA-Z_][a-zA-Z0-9_]* {printf("Valid\n");}
-^[^a-zA-Z_] {printf("Invalid\n");}
-"\n" {return 0;}
+^[a-zA-Z_][a-zA-Z0-9_]* { count_key++;}
+.|\n   {;}
 %%
-int yywrap(void) {}
-int main() 
+
+int main ( int argc,char *argv[] )
 {
-	
-	printf("Enter identifier: \n");
+	if(argc==2)
+		yyin=fopen(argv[1],"r");
+	else
+	{
+		printf("\nEnter the input:\n");
+		yyin=stdin;
+	}
 	yylex();
-	return 0;
+	printf("\nNumber of identifiers = %d\n",count_key);
 }
 
+int yywrap( )
+{
+	return 1;
+}
 
+------------------------------------------------------------------------------
 YACC PROGRAMS
 
 1.	Program to test the validity of a simple expression involving operators
