@@ -1,0 +1,661 @@
+1.	Program to count the number of vowels and consonants in a given string.
+
+%{
+#include<stdio.h> int vowels=0;
+int cons=0;
+%}
+%%
+[aeiouAEIOU]|[aeiouAEIOU] {vowels++;} 
+[a-zA-Z]|[a-zA-Z] {cons++;}
+%%
+int yywrap()
+{
+return 1;
+}
+main()
+{
+printf(“Enter the string.. at end press ^d\n”); 
+yylex();
+printf(“No of vowels=%d\nNo of consonants=%d\n”,vowels,cons);
+}
+ 
+
+
+2.	Program to count the number of characters, words, spaces, end of lines in a given input file.
+
+%{
+#include<stdio.h>
+int c = 0;
+int words = 0;
+int spaces = 0;
+int eol = 0;
+%}
+%%
+[" "] {spaces++;words++;}
+[\n] {eol++;words++;}
+[^\n\t] {c++;}
+%%
+int yywrap(void) {}
+int main()
+{
+	yylex();
+	printf("Number of spaces: %d\n", spaces);
+	printf("Number of words: %d\n", words);
+	printf("Number of end of lines %d\n", eol);
+	printf("Number of characters: %d\n", c);
+	return 0;
+}
+ 
+
+
+3.	Program to count no of:
+a) +ve and –ve integers
+b) +ve and –ve fractions
+
+%{
+	#include<stdio.h>
+	#include<string.h>
+	int posint = 0;
+	int negint = 0;
+	int posfrac = 0;
+	int negfrac = 0;
+%}
+%%
+[-][0-9]+ {negint++;}
+[+]?[0-9]+ {posint++;}
+[+]?[0-9]*\.[0-9]+ {posfrac++;}
+[-][0-9]*\.[0-9]+ {negfrac++;}
+[\n] {return 0;}
+%%
+int yywrap(void) {}
+int main()
+{
+	yylex();
+	printf("Number of pos int: %d\n", posint);
+	printf("Number of neg int: %d\n", negint);
+	printf("Number of pos frac: %d\n", posfrac);
+	printf("Number of neg frac: %d\n", negfrac);
+	return 0;
+}
+---------------------(within range=1-1000 for neg integers)
+%{
+    #include<stdio.h>
+    #include<string.h>
+    int posint=0, negint=0, posfrac=0, negfrac=0;
+%}
+
+%%
+
+[-][0-9]+ {int i=atoi(yytext);
+if (i<-1000)
+{printf("not possible");}
+else {negint++;}}
+
+[+]?[0-9]+ {posint++;}
+[-][0-9]*\.[0-9]+ {negfrac++;}
+[+]?[0-9]*\.[0-9]+ {posfrac++;}
+[\n|\t] {return 0;}
+%%
+int yywrap(void){}
+
+int main(int argc, char* argv[]){
+    
+    //yyin = fopen("a2.txt", "r");
+    yylex();
+    printf("Positive int: %d\n Negative Int: %d\n Positive fractions: %d\n Negative fractions: %d\n",posint,negint,posfrac,negfrac);
+    return 0;
+}
+
+ 
+
+
+4.	Program to count the no of comment line in a given C program. Also eliminate them and copy that program into separate file
+
+%{
+#include<stdio.h>
+int nc=0;
+%}
+
+%%
+"/*"[a-zA-Z0-9\n\t ]*"*/"  {nc++;}
+"//"[a-zA-Z0-9\t ]*"\n"   {nc++;}
+%%
+
+int main(int argc ,char* argv[])
+{
+	if(argc==2)
+	{
+		yyin=fopen(argv[1],"r");
+	}
+	else
+	{
+		printf("Enter the input\n");
+		yyin=stdin;
+	}
+	yyout=fopen("output.c","w");
+	yylex( );
+	printf("The number of comment lines=%d\n",nc);
+	fclose(yyin);
+	fclose(yyout);
+}
+
+int yywrap( )
+{
+	return 1;
+  }
+  
+ lex comments.l
+ cc lex.yy.c
+ ./a.out input.c
+ Write the program - Ctrl + D
+ cat output.c
+ 
+
+5.	Program to count the no of ‘scanf’ and ‘printf’ statements in a C program. Replace them with ‘readf’ and ‘writef’ statements respectively.
+
+%{
+#include<stdio.h>
+int count1=0, count2=0;
+%}
+
+%%
+"printf" {fprintf(yyout,"writef"); count1++;}
+"scanf" {fprintf(yyout,"readf"); count2++;}
+%%
+
+main(int argc, char *argv[])
+{
+	if(argc!=3)
+	{
+		printf("Do type as in the command line $./a.out find.txt replace.txt\n");
+		exit(0);
+	}
+	yyin=fopen(argv[1],"r");
+	yyout=fopen(argv[2],"w");
+	yylex();
+	printf("No. of printf lines = %d\n",count1);
+	printf("No. of scanf lines = %d\n",count2);
+}
+
+int yywrap()
+{
+return 1;
+}
+-----
+lex program.l
+cc lex.yy.c
+./a.out find.txt replace.txt
+Save a file as find.txt with printf and scsnf statements.
+After compiling and ./a.out, search for replace.txt file
+ 
+
+
+
+6.	Program to recognize a valid arithmetic expression and identify the identifiers and operators present. Print them separately.
+
+%{
+#include<stdio.h> #include<string.h>
+int noprt=0, nopnd=0, valid=1, top=-1, m, l=0, j=0; char opnd[10][10], oprt[10][10], a[100];
+%}
+%%
+“(“ { top++; a[top]=’(‘ ; }
+“{“ { top++; a[top]=’{‘ ; }
+“[“ { top++; a[top]=’[‘ ; }
+“)” { if(a[top]!=’(‘)
+{
+valid=0; return;
+}
+else
+top--;
+}
+“}” { if(a[top]!=’{‘)
+{
+valid=0; return;
+}
+else
+top--;
+}
+“]” { if(a[top]!=’[‘)
+{
+valid=0; return;
+}
+else
+top--;
+}
+“+”|”-“|”*”|”/” {	noprt++;
+strcpy(oprt[l], yytext); l++;
+}
+[0-9]+|[a-zA-Z][a-zA-Z0-9_]* {nopnd++;
+ 
+
+
+ 
+
+
+
+%%
+int yywrap()
+{
+ 
+strcpy(opnd[j],yytext); j++;
+}
+ 
+return 1;
+}
+
+main()
+{
+int k;
+printf(“Enter the expression.. at end press ^d\n”); yylex();
+if(valid==1 && i==-1 && (nopnd-noprt)==1)
+{
+ 
+
+
+
+
+
+}
+else
+
+}
+ 
+printf(“The expression is valid\n”); printf(“The operators are\n”); for(k=0;k<l;k++)
+Printf(“%s\n”,oprt[k]); for(k=0;k<l;k++)
+Printf(“%s\n”,opnd[k]);
+
+
+Printf(“The expression is invalid”);
+ 
+
+
+7.	Program to recognize whether a given sentence is simple or compound.
+
+%{
+#include<stdio.h>
+int flag = 0;
+%}
+%%
+(""[aA][nN][dD]"")|(""[oO][rR]"")|(""[bB][uU][tT]"") {flag=1;}
+[\n]	{return 0;}
+%%
+int yywrap(void) {}
+int main()
+{
+	printf("Enter sentence: \n");
+	yylex();
+	if(flag == 0){
+	printf("\nSentence is simple\n");
+	}
+	else{
+	printf("\nCompound\n");
+	}
+	return 0;
+}
+ 
+
+
+8.	Program to recognize and count the number of identifiers in a given input file.
+
+%{
+#include<stdio.h> int id=0;
+%}
+%%
+[a-zA-Z][a-zA-Z0-9_]* { id++ ; ECHO; printf(“\n”);}
+.+ { ;}
+\n { ;}
+%%
+int yywrap()
+{
+return 1;
+}
+
+main (int argc, char *argv[])
+{
+if(argc!=2)
+{
+printf(“Usage: <./a.out> <sourcefile>\n”); exit(0);
+}
+yyin=fopen(argv[1],”r”); printf(“Valid identifires are\n”); yylex();
+printf(“No of identifiers = %d\n”,id);
+}
+ 
+//Program to identify the identifier.
+
+%{
+#include<stdio.h>
+%}
+%%
+^[a-zA-Z_][a-zA-Z0-9_]* {printf("Valid\n");}
+^[^a-zA-Z_] {printf("Invalid\n");}
+"\n" {return 0;}
+%%
+int yywrap(void) {}
+int main() 
+{
+	
+	printf("Enter identifier: \n");
+	yylex();
+	return 0;
+}
+
+
+YACC PROGRAMS
+
+1.	Program to test the validity of a simple expression involving operators
++, -, * and / Yacc Part
+
+%token NUMBER ID NL
+%left ‘+’ ‘-‘
+%left ‘*’ ‘/’
+%%
+stmt : exp NL { printf(“Valid Expression”); exit(0);}
+;
+exp :	exp ‘+’ exp
+| exp ‘-‘ exp
+| exp ‘*’ exp
+| exp ‘/’ exp
+| ‘(‘ exp ‘)’
+| ID
+| NUMBER
+;
+%%
+int yyerror(char *msg)
+{
+printf(“Invalid Expression\n”); exit(0);
+}
+main ()
+{
+printf(“Enter the expression\n”); yyparse();
+}
+ 
+
+
+Lex Part
+
+%{
+#include “y.tab.h”
+%}
+%%
+[0-9]+ { return DIGIT; }
+[a-zA-Z][a-zA-Z0-9_]* { return ID; }
+\n { return NL ;}
+. { return yytext[0]; }
+%%
+ 
+
+
+2.	Program to recognize nested IF control statements and display the levels of nesting.
+
+Yacc Part
+
+%token IF RELOP S NUMBER ID
+%{
+int count=0;
+%}
+%%
+stmt : if_stmt { printf(“No of nested if statements=%d\n”,count); exit(0);}
+;
+if_stmt : IF ‘(‘ cond ‘)’ if_stmt {count++;}
+| S;
+;
+cond : x RELOP x
+;
+x : ID
+| NUMBER
+;
+%%
+int yyerror(char *msg)
+{
+printf(“Invalid Expression\n”); exit(0);
+}
+main ()
+{
+printf(“Enter the statement”); yyparse();
+}
+ 
+
+
+Lex Part
+
+%{
+#include “y.tab.h”
+%}
+%%
+“if” { return IF; } [sS][0-9]* {return S;}
+“<”|”>”|”==”|”!=”|”<=”|”>=” { return RELOP; } [0-9]+ { return NUMBER; }
+[a-zA-Z][a-zA-Z0-9_]* { return ID; }
+\n { ; }
+. { return yytext[0]; }
+%%
+ 
+
+
+3.	Program to check the syntax of a simple expression involving operators
++, -, * and / Yacc Part
+
+%{
+#include<stdio.h>
+#include<stdlib.h>
+%}
+%token NUMBER ID
+%left '+' '-'
+%left '*' '/'
+%%
+stmt: exp {return 0;}
+exp: exp '+' exp | exp '-' exp | exp '*' exp | exp '/' exp | '(' exp ')' | ID | NUMBER;
+%%
+int yywrap(void) {}
+int yyerror(char *msg)
+{
+	printf("Invalid\n");
+	exit(0);
+}
+int main()
+{
+	printf("Enter expression: \n");
+	yylex();
+	printf("Valid\n");
+}
+
+
+Lex Part
+
+%{
+#include "y.tab.h"
+%}
+%%
+[0-9]+ { return NUMBER; }
+[a-zA-Z][a-zA-Z0-9_]* { return ID; }
+"\n" {return 0;}
+.	{return yytext[0];}
+%%
+ 
+
+
+4.	Program to recognize a valid variable, which starts with a letter, followed by any number of letters or digits.
+
+Yacc Part
+
+%{
+#include<stdio.h>
+#include<stdlib.h>
+%}
+%token DIGIT LETTER UND
+%%
+stmt : variable	{return 0;}
+variable : LETTER alphanumeric;
+alphanumeric: LETTER alphanumeric
+| DIGIT alphanumeric
+| UND alphanumeric
+| LETTER
+| DIGIT
+| UND
+;
+%%
+int main()
+{
+	printf("Enter variable: \n");
+	yyparse();
+	printf("Valid variable\n");
+}
+int yyerror()
+{
+	printf("Invalid\n");
+	exit(0);
+}
+ 
+
+
+Lex Part
+
+%{
+#include "y.tab.h"
+%}
+%%
+[a-zA-Z]	{return LETTER;}
+[0-9]	{return DIGIT;}
+[_]	{return UND;}
+[\n]	{return yytext[0];}
+%%
+ 
+
+
+
+
+5.	Program to evaluate an arithmetic expression involving operating +, -,
+* and /. Yacc Part
+
+%{
+    #include<stdio.h>
+%}
+%token NUM
+%left '+' '-'
+%left '*' '/'
+%left '(' ')'
+%%
+expr: e{
+         printf("result:%d\n",$$);
+         return 0;
+        }
+e:e'+'e {$$=$1+$3;}
+ |e'-'e {$$=$1-$3;}
+ |e'*'e {$$=$1*$3;}
+ |e'/'e {$$=$1/$3;}
+ |'('e')' {$$=$2;}
+ | NUM {$$=$1;}
+;
+%%
+ 
+main()
+{
+   printf("\n enter the arithematic expression:\n");
+   yyparse();
+   printf("\nvalid expression\n");
+}
+yyerror()
+{
+   printf("\n invalid expression\n");
+   exit(0);
+}
+
+
+
+Lex Part
+
+%{
+#include<stdio.h>
+#include"y.tab.h"
+extern int yylval;
+%}
+ 
+%%
+[0-9]+ { 
+          yylval=atoi(yytext);
+          return NUM;
+       }
+[\t] ;
+\n return 0;
+. return yytext[0];
+%%
+
+ 
+
+
+6.	Program to recognize strings ‘aaab’, ‘abbb’, ‘ab’ and ‘a’ using grammar (anbn, n>=0)
+
+Yacc Part
+
+%{
+#include<stdio.h>
+#include<stdlib.h>
+%}
+%token A B
+%%
+str : s '\n' {return 0;}
+s : A s B;
+|;
+%%
+int main()
+{
+	printf("Enter string: \n");
+	yyparse();
+	printf("Valid string\n");
+}
+int yyerror() 
+{
+	printf("Invalid string\n");
+	exit(0);
+}
+
+
+Lex Part
+
+%{
+#include "y.tab.h"
+%}
+%%
+[aA] {return A;}
+[bB] {return B;}
+"\n" {return yytext[0];}
+.	{return yytext[0];}
+%%
+ 
+
+
+7.	Program to recognize the grammar (anb, n>=10)
+
+%{
+#include<stdio.h>
+%}
+%token A B
+%%
+str :  A A A A A A A A A A s B {return 0;}
+s : s A;
+|;
+%%
+int main()
+{
+	printf("enter string: \n");
+	yyparse();
+	printf("Valid string\n");
+}
+int yyerror()
+{
+	printf("Invalid\n");
+	exit(0);
+}
+
+
+Lex Part
+
+%{
+#include “y.tab.h”
+%}
+%%
+[aA] { return A; }
+[bB] { return B; }
+\n { return yytext[0] ;}
+. { return yytext[0]; }
+%%
+ 
