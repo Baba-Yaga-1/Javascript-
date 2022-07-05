@@ -1,0 +1,75 @@
+0S1|1S0|0|1
+
+%{
+#include "palindrome.tab.h"
+%}
+%%
+[0]+ { return ZERO; }
+[1]+ { return ONE; }
+\n { return NL ;}
+%%
+ 
+ SAVE AS palindrome.l
+ 
+ 
+--------- Yacc PART-----------
+ 
+ %{
+        #include<stdio.h>
+        #include<stdlib.h>
+        extern int yylex();
+%}
+%token ZERO ONE NL
+%%
+stmt : exp NL { printf("Valid Expression"); exit(0);}
+;
+exp : ZERO sm
+| ONE am
+;
+sm : sm ONE
+|
+;
+am : am ZERO
+|
+;
+%%
+int yyerror(char *msg)
+{
+printf("Invalid Expression\n");
+exit(0);
+}
+int main ()
+{
+printf("Enter the expression\n");
+yyparse();
+return 0;
+}
+int yywrap()
+{
+        return 1;
+}
+
+/* odd even program */
+%{
+  #include<stdio.h>
+  int x;
+%}
+%%
+[0-9]+ {x=atoi (yytext);
+        if(x%2==0)
+           printf("even number");
+        else
+           printf("odd number");
+}
+.* {printf("input not a  number");}
+%%
+int main()
+{
+printf("enter the input\n");
+yylex();
+return 1;
+}
+int yywrap()
+{
+return 1;
+}
