@@ -73,3 +73,40 @@ int yywrap()
 {
 return 1;
 }
+
+
+//function arguments
+
+%{
+  #include<stdio.h>
+  int actualzero[30], zero, one, two;
+%}
+%%
+[a-zA-Z_]+[0-9]*"();" {zero++;}
+[a-zA-Z_]+[0-9]*"("[ a-zA-Z0-9\.']+");" {one++;}
+[a-zA-Z_]+[0-9]*"("[ a-zA-Z0-9\.']+[,][ a-zA-Z0-9\.']+");" {two++;}
+.* {;}
+%%
+int main()
+{
+yyin = fopen("arguments.c", "r");
+yylex();
+printf("zeros arguments= %d, ones arguments = %d, twos arguments = %d", zero, one, two);
+return 1;
+}
+int yywrap()
+{
+return 1;
+}
+
+c file code
+#include<stdio.h>
+main()
+{
+printf();
+scanf();
+m();
+ma(1.5);
+mb(1, 'a');
+}
+
