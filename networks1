@@ -68,3 +68,6 @@ for(i=0; i<dlen; i++)
 
  return 0;
 }
+
+
+https://linuxhint.com/install-netstat-command-linux/
