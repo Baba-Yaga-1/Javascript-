@@ -2,124 +2,173 @@
 
 server.c
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<netinet/in.h>
 
-int main(){
-
-  char *ip = "127.0.0.1";
-  int port = 5566;
-
-  int server_sock, client_sock;
-  struct sockaddr_in server_addr, client_addr;
-  socklen_t addr_size;
-  char buffer[1024];
-  int n;
-
-  server_sock = socket(AF_INET, SOCK_STREAM, 0);
-  if (server_sock < 0){
-    perror("[-]Socket error");
+void error(const char *msg){
+    perror(msg);
     exit(1);
-  }
-  printf("[+]TCP server socket created.\n");
-
-  memset(&server_addr, '\0', sizeof(server_addr));
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_port = port;
-  server_addr.sin_addr.s_addr = inet_addr(ip);
-
-  n = bind(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
-  if (n < 0){
-    perror("[-]Bind error");
-    exit(1);
-  }
-  printf("[+]Bind to the port number: %d\n", port);
-
-  listen(server_sock, 5);
-  printf("Listening...\n");
-
-  while(1){
-    addr_size = sizeof(client_addr);
-    client_sock = accept(server_sock, (struct sockaddr*)&client_addr, &addr_size);
-    printf("[+]Client connected.\n");
-
-    bzero(buffer, 1024);
-    recv(client_sock, buffer, sizeof(buffer), 0);
-    printf("Client: %s\n", buffer);
-
-    bzero(buffer, 1024);
-    strcpy(buffer, "HI, THIS IS SERVER. HAVE A NICE DAY!!!");
-    printf("Server: %s\n", buffer);
-    send(client_sock, buffer, strlen(buffer), 0);
-
-    close(client_sock);
-    printf("[+]Client disconnected.\n\n");
-
-  }
-
-  return 0;
 }
 
+int main(int argc, char *argv[]){
+
+    if(argc<2){
+        fprintf(stderr, "Port no. not provided. Program terminated\n");
+        exit(1);
+    }
+
+    int sockfd, newsockfd, portno, n;
+    char buffer[255];
+
+    // sockaddr_in gives us the internet address, it is included in the file <netinet/in.h>
+    struct sockaddr_in serv_addr, cli_addr;
+    socklen_t clilen;      			//socklen_t is a datatype in socket.h 
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd<0){
+        error("Error opening socket.");
+    }
+
+    //bzero clears any data or text 
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    portno = atoi(argv[1]);
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(portno);    //htons = host to network short
+
+
+    //we need to typecast sockaddr_in into sockaddr
+    if(bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))<0){
+        error("Binding failed.");
+    }
+
+
+    // Next step is Listening
+    listen(sockfd, 5);					// 5 gives the max. limit of clients
+    clilen = sizeof(cli_addr); 
+
+    /* Next, whenever we accept a connection, we get a new file descriptor
+    again we need to typecast sockaddr_in into sockaddr*/
+    newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+
+    if(newsockfd<0){
+        error("Error on accept!");
+    }
+
+    while(1){
+        bzero(buffer, 255);
+        n = read(newsockfd, buffer, 255);
+        if(n<0){
+            error("Error on reading!");
+        }
+        printf("Client: %s\n", buffer);
+        
+        bzero(buffer, 255);
+        fgets(buffer, 255, stdin);
+        
+        n = write(newsockfd, buffer, strlen(buffer));
+        if(n<0){
+            error("Error on writing");
+        }
+
+        int i = strncmp("Bye", buffer, 3);
+        if(i==0){
+            break;
+        }
+     }
+        close(newsockfd);
+        close(sockfd);
+        return 0;
+    }
+---------------
 client.c
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<netdb.h>
 
-int main(){
-
-  char *ip = "127.0.0.1";
-  int port = 5566;
-
-  int sock;
-  struct sockaddr_in addr;
-  socklen_t addr_size;
-  char buffer[1024];
-  int n;
-
-  sock = socket(AF_INET, SOCK_STREAM, 0);
-  if (sock < 0){
-    perror("[-]Socket error");
+void error(const char *msg){
+    perror(msg);
     exit(1);
-  }
-  printf("[+]TCP server socket created.\n");
+}
 
-  memset(&addr, '\0', sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = port;
-  addr.sin_addr.s_addr = inet_addr(ip);
+int main(int argc, char *argv[]){
 
-  connect(sock, (struct sockaddr*)&addr, sizeof(addr));
-  printf("Connected to the server.\n");
+    if(argc<3){
+        fprintf(stderr, "Usage: %s Hostname Port \n", argv[0]);
+        exit(1);
+    }
 
-  bzero(buffer, 1024);
-  strcpy(buffer, "HELLO, THIS IS CLIENT.");
-  printf("Client: %s\n", buffer);
-  send(sock, buffer, strlen(buffer), 0);
+    int sockfd, portno, n;
+    struct sockaddr_in serv_addr;
+    char buffer[256];
+    struct hostent *server;      //hostent structure is used to store info. about a given host; included in <netdb.h>
 
-  bzero(buffer, 1024);
-  recv(sock, buffer, sizeof(buffer), 0);
-  printf("Server: %s\n", buffer);
+    portno = atoi(argv[2]);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-  close(sock);
-  printf("Disconnected from the server.\n");
+    if(sockfd<0)
+        error("Error opening socket.");
+    
+    server = gethostbyname(argv[1]);
+    if(server==NULL){
+        fprintf(stderr, "No such host");
+    }
 
-  return 0;
+    bzero((char*) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    
+    //Transferring info. from *server into serv_addr
+    bcopy((char *) server->h_addr, (char *) &serv_addr.sin_addr.s_addr, server->h_length);
+    
+    serv_addr.sin_port = htons(portno);
 
+//Next try connecting to the server
+    if(connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))<0)
+        error("Connection failed");
+    
+    while(1){
+        bzero(buffer, 255);
+        fgets(buffer, 255, stdin);
+
+        n = write(sockfd, buffer, strlen(buffer));
+        if(n<0){
+            error("Error on writing.");
+        }
+        
+        bzero(buffer, 255);
+        n = read(sockfd, buffer, 255);
+        if(n<0){
+            error("Error on reading.");
+        }
+
+        printf("Server: %s", buffer);
+
+        int i = strncmp("Bye", buffer, 3);
+        if(i==0){
+            break;
+        }
+    }
+    close(sockfd);
+    return 0;
 }
 -------
 Server side: 
 gcc server.c -o server 
-./server
+./server 5000
 
 Client side: 
 gcc client.c -o client 
-./client (separate terminal)
+./client 127.0.0.1 5000(separate terminal)
 ---------------------------
 
 //WAP to implement the transfer of files using UNIX socket programming
